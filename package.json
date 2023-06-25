@@ -5,9 +5,7 @@
   "author": "penpenpng",
   "keywords": [
     "vitest",
-    "websocket",
-    "mock",
-    "unit-testing",
+    "websocket-mock",
     "nostr"
   ],
   "homepage": "https://github.com/penpenpng/vitest-nostr-relay-mock/",
