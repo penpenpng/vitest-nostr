@@ -1,17 +1,10 @@
-# vitest-nostr
+import { afterEach, beforeEach, expect, test } from "vitest";
 
-```
-npm install -D vitest vitest-websocket-mock vitest-nostr
-```
-
-## Examples
-
-```ts
-import { expect, test, beforeEach, afterEach } from "vitest";
-import { relay, faker, type MockRelay } from "vitest-nostr";
+import { createMockRelay, faker, type MockRelay } from "..";
 
 let relay: MockRelay;
 let client: WebSocket;
+
 beforeEach(async () => {
   relay = createMockRelay("ws://localhost:1234");
   client = new WebSocket("ws://localhost:1234");
@@ -85,4 +78,3 @@ test("Client can REQ and CLOSE", async () => {
 
   // It is expected that client receive EVENT and EOSE!
 });
-```

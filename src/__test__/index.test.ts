@@ -1,10 +1,7 @@
-import "../matcher";
-
 import * as Nostr from "nostr-typedef";
 import { afterEach, beforeEach, describe, expect, test } from "vitest";
 
-import { faker } from "../faker";
-import { createMockRelay, MockRelay, MockServerSocket } from "../mock";
+import { createMockRelay, faker, MockRelay, MockServerSocket } from "..";
 import { createMockClient, type MockClient } from "./helper";
 
 describe("Faker", () => {
