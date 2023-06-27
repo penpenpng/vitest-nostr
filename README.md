@@ -1,6 +1,6 @@
 # vitest-nostr
 
-vitest utilities for Nostr client, including extended matcher, faker, and relay mock.
+vitest utilities for Nostr client, including faker, extended matcher, and relay mock.
 
 ## Installation
 
@@ -10,7 +10,49 @@ npm install -D vitest vitest-websocket-mock vitest-nostr
 
 ## Examples
 
-[readme.test.ts](./src/__test__/readme.test.ts)
+## Faker
+
+```ts
+import { faker } from "vitest-nostr";
+
+// Get dummy event object.
+faker.event();
+
+// You can specify some values.
+faker.event({ kind: 1 });
+```
+
+See [faker.ts](./src/faker.ts) for a complete list of objects supported.
+
+## Extended Matcher
+
+```ts
+import "vitest-nostr"; // needed to extend matcher.
+import { expect, test } from "vitest";
+
+test("It is REQ message", () => {
+  expect(["REQ", "sub1", { kinds: [1] }]).beToRelayREQ();
+});
+
+test("It is REQ message with specified subId", () => {
+  expect(["REQ", "sub1", { kinds: [1] }]).beToRelayREQ("sub1");
+});
+
+test("It is specified REQ message", () => {
+  expect(["REQ", "sub1", { kinds: [1] }]).beToRelayREQ([
+    "sub1",
+    { kinds: [1] },
+  ]);
+
+  // or just you can use toEqual() matcher.
+});
+```
+
+See [matcher.ts](./src/matcher.ts) for a complete list of extended matchers.
+
+## Relay Mock
+
+[readme.test.ts](./src/__test__/readme-relay-mock.test.ts)
 
 ```ts
 import { expect, test, beforeEach, afterEach } from "vitest";
