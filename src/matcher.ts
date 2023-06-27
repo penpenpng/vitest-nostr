@@ -5,12 +5,12 @@ import { deriveToReceiveMessage } from "vitest-websocket-mock";
 
 declare module "vitest" {
   // eslint-disable-next-line @typescript-eslint/no-empty-interface, @typescript-eslint/no-explicit-any
-  interface Assertion<T = any> extends CustomMatchers<T> {}
+  interface Assertion<T = any> extends CustomMatchers {}
   // eslint-disable-next-line @typescript-eslint/no-empty-interface
   interface AsymmetricMatchersContaining extends CustomMatchers {}
 }
 
-interface CustomMatchers<R = unknown> {
+interface CustomMatchers {
   beToRelayAUTH(): void;
   beToRelayAUTH(
     event: Partial<Nostr.Event<Nostr.Kind.ClientAuthentication>>

@@ -69,7 +69,7 @@ export function createMockServer(
   return Object.assign(server, {
     waitConnected: async (count: number) => {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      let resolver = (x: MockServerSocket[]) => {
+      let resolver = (_x: MockServerSocket[]) => {
         /* do nothing */
       };
       const promise = new Promise<MockServerSocket[]>((resolve) => {
