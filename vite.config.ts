@@ -10,7 +10,7 @@ export default defineConfig({
       name: "vitest-nostr",
       fileName: (format) => `index.${format}.js`,
       entry: path.resolve(__dirname, "src/index.ts"),
-      formats: ["es", "cjs", "umd"],
+      formats: ["es", "cjs"],
     },
     sourcemap: true,
   },
