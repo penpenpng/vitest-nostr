@@ -1,7 +1,7 @@
 {
   "name": "vitest-nostr",
   "version": "0.1.0",
-  "description": "Nostr relay mock based on vitest-websocket-mock",
+  "description": "vitest library utilities for Nostr client",
   "author": "penpenpng",
   "keywords": [
     "vitest",
