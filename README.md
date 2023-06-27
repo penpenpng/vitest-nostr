@@ -84,7 +84,7 @@ test("Client can REQ and CLOSE", async () => {
   await expect(relay).toReceiveREQ();
 
   // If the mock relay has already received the REQ,
-  // the relay will automatically determine from the subId where to deliver the EVENT.
+  // the relay will automatically determine where to deliver the EVENT, based on given subId.
   relay.emitEVENT("sub1");
 
   // ditto
