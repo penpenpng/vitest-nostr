@@ -12,6 +12,7 @@ import { relay, faker, type MockRelay } from "vitest-nostr";
 
 let relay: MockRelay;
 let client: WebSocket;
+
 beforeEach(async () => {
   relay = createMockRelay("ws://localhost:1234");
   client = new WebSocket("ws://localhost:1234");
