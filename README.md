@@ -1,10 +1,16 @@
 # vitest-nostr
 
+vitest utilities for Nostr client, including extended matcher, faker, and relay mock.
+
+## Installation
+
 ```
 npm install -D vitest vitest-websocket-mock vitest-nostr
 ```
 
 ## Examples
+
+[readme.test.ts](./src/__test__/readme.test.ts)
 
 ```ts
 import { expect, test, beforeEach, afterEach } from "vitest";
