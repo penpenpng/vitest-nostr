@@ -1,1 +1,1 @@
-# vitest-nostr-relay-mock
+# vitest-nostr
