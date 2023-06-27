@@ -8,7 +8,7 @@ npm install -D vitest vitest-websocket-mock vitest-nostr
 
 ```ts
 import { expect, test, beforeEach, afterEach } from "vitest";
-import { relay, faker, type MockRelay } from "vitest-nostr";
+import { createMockRelay, faker, type MockRelay } from "vitest-nostr";
 
 let relay: MockRelay;
 let client: WebSocket;
