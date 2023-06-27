@@ -1,12 +1,14 @@
 {
   "name": "vitest-nostr",
   "version": "0.1.0",
-  "description": "vitest library utilities for Nostr client",
+  "description": "vitest utilities for Nostr client",
   "author": "penpenpng",
   "keywords": [
+    "nostr",
     "vitest",
-    "websocket-mock",
-    "nostr"
+    "faker",
+    "custom-matcher",
+    "websocket-mock"
   ],
   "homepage": "https://github.com/penpenpng/vitest-nostr/",
   "bugs": {
@@ -28,7 +30,7 @@
     "dist",
     "types",
     "!src/__test__",
-    "!types/src/__test__"
+    "!types/__test__"
   ],
   "repository": {
     "type": "git",
