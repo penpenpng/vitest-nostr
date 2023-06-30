@@ -17,12 +17,12 @@
   "license": "MIT",
   "type": "module",
   "module": "./dist/index.es.js",
-  "types": "./types/src/index.d.ts",
+  "types": "./types/index.d.ts",
   "exports": {
     ".": {
       "import": "./dist/index.es.js",
       "require": "./dist/index.cjs.js",
-      "types": "./types/src/index.d.ts"
+      "types": "./types/index.d.ts"
     }
   },
   "files": [
