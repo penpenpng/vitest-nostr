@@ -13,5 +13,8 @@ export default defineConfig({
       formats: ["es", "cjs"],
     },
     sourcemap: true,
+    rollupOptions: {
+      external: ["vitest", "vitest-websocket-mock"],
+    },
   },
 });
