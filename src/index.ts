@@ -9,3 +9,4 @@ export {
   type MockServerBehavior,
   type MockServerSocket,
 } from "./mock";
+export { type ClientSpy, createClientSpy } from "./spy";

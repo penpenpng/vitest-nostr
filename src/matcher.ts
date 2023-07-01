@@ -3,6 +3,10 @@ import Nostr from "nostr-typedef";
 import { expect } from "vitest";
 import { deriveToReceiveMessage } from "vitest-websocket-mock";
 
+import { TimeoutError } from ".";
+import type { ClientSpy } from "./spy";
+import { withTimeout } from "./utils";
+
 declare module "vitest" {
   // eslint-disable-next-line @typescript-eslint/no-empty-interface, @typescript-eslint/no-explicit-any
   interface Assertion<T = any> extends CustomMatchers {}
@@ -59,6 +63,24 @@ interface CustomMatchers {
   toReceiveREQ(subId: string): Promise<void>;
   toReceiveREQ(
     expected: [subId: string, ...filters: Nostr.Filter[]]
+  ): Promise<void>;
+
+  toSeeAUTH(): Promise<void>;
+  toSeeAUTH(challengeMessage: string): Promise<void>;
+  toSeeCOUNT(): Promise<void>;
+  toSeeCOUNT(subId: string): Promise<void>;
+  toSeeCOUNT(expected: [subId: string, count: number]): Promise<void>;
+  toSeeEOSE(): Promise<void>;
+  toSeeEOSE(subId: string): Promise<void>;
+  toSeeEVENT(): Promise<void>;
+  toSeeEVENT(subId: string): Promise<void>;
+  toSeeEVENT(
+    expected: [subId: string, event: Partial<Nostr.Event>]
+  ): Promise<void>;
+  toSeeNOTICE(): Promise<void>;
+  toSeeNOTICE(message: string): Promise<void>;
+  toSeeOK(
+    expected: [eventId: string, succeeded: boolean, message?: string]
   ): Promise<void>;
 }
 
@@ -168,12 +190,6 @@ const beToRelayREQ: RawMatcherFn = function (
     pass,
   };
 };
-
-const toReceiveAUTH = deriveToReceiveMessage("toReceiveAUTH", beToRelayAUTH);
-const toReceiveCLOSE = deriveToReceiveMessage("toReceiveCLOSE", beToRelayCLOSE);
-const toReceiveCOUNT = deriveToReceiveMessage("toReceiveCOUNT", beToRelayCOUNT);
-const toReceiveEVENT = deriveToReceiveMessage("toReceiveEVENT", beToRelayEVENT);
-const toReceiveREQ = deriveToReceiveMessage("toReceiveREQ", beToRelayREQ);
 
 const beToClientAUTH: RawMatcherFn = function (
   actual,
@@ -300,6 +316,19 @@ const beToClientOK: RawMatcherFn = function (
   };
 };
 
+const toReceiveAUTH = deriveToReceiveMessage("toReceiveAUTH", beToRelayAUTH);
+const toReceiveCLOSE = deriveToReceiveMessage("toReceiveCLOSE", beToRelayCLOSE);
+const toReceiveCOUNT = deriveToReceiveMessage("toReceiveCOUNT", beToRelayCOUNT);
+const toReceiveEVENT = deriveToReceiveMessage("toReceiveEVENT", beToRelayEVENT);
+const toReceiveREQ = deriveToReceiveMessage("toReceiveREQ", beToRelayREQ);
+
+const toSeeAUTH = clientMathcer("toSeeAUTH", beToClientAUTH);
+const toSeeCOUNT = clientMathcer("toSeeCOUNT", beToClientCOUNT);
+const toSeeEOSE = clientMathcer("toSeeEOSE", beToClientEOSE);
+const toSeeEVENT = clientMathcer("toSeeEVENT", beToClientEVENT);
+const toSeeNOTICE = clientMathcer("toSeeNOTICE", beToClientNOTICE);
+const toSeeOK = clientMathcer("toSeeOK", beToClientOK);
+
 expect.extend({
   beToRelayAUTH,
   beToRelayCLOSE,
@@ -319,7 +348,55 @@ expect.extend({
   toReceiveCOUNT,
   toReceiveEVENT,
   toReceiveREQ,
+
+  toSeeAUTH,
+  toSeeCOUNT,
+  toSeeEOSE,
+  toSeeEVENT,
+  toSeeNOTICE,
+  toSeeOK,
 });
+
+function clientMathcer(name: string, fn: RawMatcherFn): RawMatcherFn {
+  return async function (spy: ClientSpy, pred: unknown, options?: unknown) {
+    if (spy.__createClientSpy) {
+      try {
+        return await withTimeout(async () =>
+          fn.call(this, await spy.next(), pred, options)
+        );
+      } catch (err) {
+        if (err instanceof TimeoutError) {
+          return {
+            pass: this.isNot,
+            message: () =>
+              this.utils.matcherHint(
+                `${this.isNot ? ".not" : ""}.${name}`,
+                "ClientSpy",
+                "expected"
+              ) +
+              "\n\n" +
+              `Client spy was waiting for the next message from the relay, but timed out.`,
+          };
+        } else {
+          throw err;
+        }
+      }
+    } else {
+      return {
+        pass: this.isNot,
+        message: () =>
+          this.utils.matcherHint(
+            `${this.isNot ? ".not" : ""}.${name}`,
+            "ClientSpy",
+            "expected"
+          ) +
+          "\n\n" +
+          `Mathcer \`${name}\` must be used for ClientSpy, but now being used for:\n\n` +
+          `${this.utils.printReceived(spy)}\n`,
+      };
+    }
+  };
+}
 
 function isNostrMessage<
   T extends Nostr.ToClientMessage.Any[0] | Nostr.ToRelayMessage.Any[0]

@@ -2,8 +2,8 @@ import { CloseOptions } from "mock-socket";
 import Nostr from "nostr-typedef";
 import { WS } from "vitest-websocket-mock";
 
-import { TimeoutError } from "./error";
 import { faker } from "./faker";
+import { withTimeout } from "./utils";
 
 export interface MockServerSocket {
   id: number;
@@ -301,7 +301,7 @@ export function createMockRelay(url: string): MockRelay {
       ),
     nexts: (count: number, timeout?: number) =>
       withTimeout(
-        (async () => {
+        async () => {
           const messages: Nostr.ToRelayMessage.Any[] = [];
           for (let i = 0; i < count; i++) {
             messages.push(
@@ -309,7 +309,7 @@ export function createMockRelay(url: string): MockRelay {
             );
           }
           return messages;
-        })(),
+        },
         timeoutMessage,
         timeout
       ),
@@ -319,17 +319,4 @@ export function createMockRelay(url: string): MockRelay {
     emitEVENT,
     emitOK,
   });
-}
-
-function withTimeout<T>(
-  task: Promise<T>,
-  message: string,
-  timeout = 1000
-): Promise<T> {
-  return Promise.race([
-    task,
-    new Promise<T>((_, reject) =>
-      setTimeout(() => reject(new TimeoutError(message)), timeout)
-    ),
-  ]);
 }

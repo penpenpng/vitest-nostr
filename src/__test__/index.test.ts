@@ -310,9 +310,9 @@ describe("Relay mock", () => {
     await expect(relay).toReceiveREQ();
 
     relay.emitEVENT("x");
-    expect(await client.next()).beToClientEVENT("x");
+    await expect(client).toSeeEVENT("x");
     relay.emitEVENT("x");
-    expect(async () => expect(await client.next()).beToClientEVENT("y")).rejects
+    expect(() => expect(client).toSeeEVENT("y")).rejects
       .toThrowErrorMatchingInlineSnapshot(`
       "It was expected to be a to-client-EVENT message, like this:
 
@@ -341,7 +341,7 @@ describe("Relay mock", () => {
     `);
 
     relay.emitEOSE("x");
-    expect(await client.next()).beToClientEOSE("x");
+    await expect(client).toSeeEOSE("x");
 
     client.send(faker.CLOSE("x"));
     await expect(relay).toReceiveCLOSE();
@@ -351,21 +351,21 @@ describe("Relay mock", () => {
     await expect(relay).toReceiveREQ("x");
 
     relay.emitEVENT("x");
-    expect(await client.next()).beToClientEVENT("x");
+    await expect(client).toSeeEVENT("x");
 
     client.send(faker.REQ("y"));
     await expect(relay).toReceiveREQ("y");
 
     relay.emitEVENT("x");
-    expect(await client.next()).beToClientEVENT("x");
+    await expect(client).toSeeEVENT("x");
     relay.emitEVENT("y");
-    expect(await client.next()).beToClientEVENT("y");
+    await expect(client).toSeeEVENT("y");
 
     client.send(faker.CLOSE("y"));
     await expect(relay).toReceiveCLOSE("y");
 
     relay.emitEVENT("x");
-    expect(await client.next()).beToClientEVENT("x");
+    await expect(client).toSeeEVENT("x");
 
     client.send(faker.CLOSE("x"));
     await expect(relay).toReceiveCLOSE("x");
@@ -375,7 +375,7 @@ describe("Relay mock", () => {
     await expect(relay).toReceiveCOUNT();
 
     relay.emitCOUNT("x");
-    expect(await client.next()).beToClientCOUNT("x");
+    await expect(client).toSeeCOUNT("x");
   });
 });
 
@@ -406,10 +406,10 @@ describe("Relay mock with multiple sockets", () => {
 
   test("can send NOTICE messages to specified client", async () => {
     relay.emit(["NOTICE", "Hello client1"], socket1);
-    expect(await client1.next()).beToClientNOTICE("Hello client1");
+    await expect(client1).toSeeNOTICE("Hello client1");
 
     relay.emit(["NOTICE", "Hello client2"], socket2);
-    expect(await client2.next()).beToClientNOTICE("Hello client2");
+    await expect(client2).toSeeNOTICE("Hello client2");
   });
   test("can test", async () => {
     client1.send(faker.REQ("x1"));
@@ -425,31 +425,31 @@ describe("Relay mock with multiple sockets", () => {
 
     // NOTICE
     relay.emit(["NOTICE", "Hello client1"], socket1);
-    expect(await client1.next()).beToClientNOTICE("Hello client1");
+    await expect(client1).toSeeNOTICE("Hello client1");
 
     relay.emit(["NOTICE", "Hello client2"], socket2);
-    expect(await client2.next()).beToClientNOTICE("Hello client2");
+    await expect(client2).toSeeNOTICE("Hello client2");
 
     // EVENT
     relay.emitEVENT("x1");
-    expect(await client1.next()).beToClientEVENT("x1");
+    await expect(client1).toSeeEVENT("x1");
 
     relay.emitEVENT("x2");
-    expect(await client2.next()).beToClientEVENT("x2");
+    await expect(client2).toSeeEVENT("x2");
 
     relay.emitEVENT("common");
-    expect(await client1.next()).beToClientEVENT("common");
-    expect(await client2.next()).beToClientEVENT("common");
+    await expect(client1).toSeeEVENT("common");
+    await expect(client2).toSeeEVENT("common");
 
     // EOSE
     relay.emitEOSE("x1");
-    expect(await client1.next()).beToClientEOSE("x1");
+    await expect(client1).toSeeEOSE("x1");
 
     relay.emitEOSE("x2");
-    expect(await client2.next()).beToClientEOSE("x2");
+    await expect(client2).toSeeEOSE("x2");
 
     relay.emitEOSE("common");
-    expect(await client1.next()).beToClientEOSE("common");
-    expect(await client2.next()).beToClientEOSE("common");
+    await expect(client1).toSeeEOSE("common");
+    await expect(client2).toSeeEOSE("common");
   });
 });

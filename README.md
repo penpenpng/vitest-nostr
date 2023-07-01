@@ -26,19 +26,25 @@ See [faker.ts](./src/faker.ts) for a complete list of objects supported.
 
 ## Extended Matcher
 
+vitest-nostr provides extended matchers for common data types exchanged over the Nostr protocol.
+
 ```ts
 import "vitest-nostr"; // needed to extend matcher.
 import { expect, test } from "vitest";
 
 test("It is REQ message", () => {
+  // Tests if it is an REQ message.
+  // We are not interested in the specifics of the message now.
   expect(["REQ", "sub1", { kinds: [1] }]).beToRelayREQ();
 });
 
 test("It is REQ message with specified subId", () => {
+  // We are now only interested in subId matching.
   expect(["REQ", "sub1", { kinds: [1] }]).beToRelayREQ("sub1");
 });
 
 test("It is specified REQ message", () => {
+  // We are interested in the complete REQ message.
   expect(["REQ", "sub1", { kinds: [1] }]).beToRelayREQ([
     "sub1",
     { kinds: [1] },
@@ -52,7 +58,8 @@ See [matcher.ts](./src/matcher.ts) for a complete list of extended matchers.
 
 ## Relay Mock
 
-[readme.test.ts](./src/__test__/readme-relay-mock.test.ts)
+`createMockRelay()` provides an imitation of a relay.
+You can test what messages your real WebSocket on the client side sends to the (mock) relay, and whether the client behaves ideally when the (mock) relay sends a particular message to the client.
 
 ```ts
 import { expect, test, beforeEach, afterEach } from "vitest";
@@ -133,5 +140,48 @@ test("Client can REQ and CLOSE", async () => {
   relay.emitEOSE("sub1");
 
   // It is expected that client receive EVENT and EOSE!
+});
+```
+
+## Client Spy
+
+`createClientSpy()` allows you to test whether your client, or more precisely, your any callback function that may receive [Nostr.ToClientMessage.Any](https://github.com/penpenpng/nostr-typedef/blob/main/index.d.ts#L101), is actually receiving the desired message.
+
+```ts
+import { afterEach, beforeEach, expect, test } from "vitest";
+
+import {
+  type ClientSpy,
+  createClientSpy,
+  createMockRelay,
+  type MockRelay,
+} from "vitest-nostr";
+
+let relay: MockRelay;
+let client: WebSocket;
+let spy: ClientSpy;
+
+beforeEach(async () => {
+  relay = createMockRelay("ws://localhost:1234");
+  client = new WebSocket("ws://localhost:1234");
+
+  spy = createClientSpy((listener) => {
+    client.addEventListener("message", ({ data }) =>
+      listener(JSON.parse(data))
+    );
+  });
+
+  await relay.connected;
+});
+
+afterEach(() => {
+  relay.close();
+  client.close();
+  spy.dispose();
+});
+
+test("Client can send REQ", async () => {
+  relay.emit(["NOTICE", "Hello, client!"]);
+  await expect(spy).toSeeNOTICE("Hello, client!");
 });
 ```
