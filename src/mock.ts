@@ -19,7 +19,8 @@ export interface MockServerBehavior {
 }
 
 interface MockServer extends WS {
-  waitConnected: (sockets: number) => Promise<MockServerSocket[]>;
+  getSockets: (count: number) => Promise<MockServerSocket[]>;
+  getSocket: (index: number) => Promise<MockServerSocket>;
 }
 
 export function createMockServer(
@@ -66,27 +67,34 @@ export function createMockServer(
     });
   });
 
+  const getSockets = async (count: number) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    let resolver = (_x: MockServerSocket[]) => {
+      /* do nothing */
+    };
+    const promise = new Promise<MockServerSocket[]>((resolve) => {
+      resolver = resolve;
+    });
+
+    setInterval(() => {
+      if (sockets.length >= count) {
+        return resolver(sockets);
+      }
+    }, 10);
+
+    return withTimeout(
+      promise,
+      `Mock relay was waiting for ${count} connections to be established, but timed out.`
+    );
+  };
+  const getSocket = async (index: number) => {
+    const sockets = await getSockets(index + 1);
+    return sockets[index];
+  };
+
   return Object.assign(server, {
-    waitConnected: async (count: number) => {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      let resolver = (_x: MockServerSocket[]) => {
-        /* do nothing */
-      };
-      const promise = new Promise<MockServerSocket[]>((resolve) => {
-        resolver = resolve;
-      });
-
-      setInterval(() => {
-        if (sockets.length >= count) {
-          return resolver(sockets);
-        }
-      }, 10);
-
-      return withTimeout(
-        promise,
-        `Mock relay was waiting for ${count} connections to be established, but timed out.`
-      );
-    },
+    getSockets,
+    getSocket,
   });
 }
 

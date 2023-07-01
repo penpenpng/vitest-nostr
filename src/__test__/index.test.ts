@@ -395,7 +395,7 @@ describe("Relay mock with multiple sockets", () => {
 
     await relay.connected;
 
-    [socket1, socket2] = await relay.waitConnected(2);
+    [socket1, socket2] = await relay.getSockets(2);
   });
 
   afterEach(() => {

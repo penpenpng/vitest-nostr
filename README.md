@@ -115,9 +115,9 @@ test("Client can receive message", async () => {
     resolver();
   };
 
-  // Wait until the relay establishes one connection,
+  // Wait until the relay establishes the first connection,
   // then get the socket on the relay side.
-  const [socket] = await relay.waitConnected(1);
+  const socket = await relay.getSocket(0);
   // When you have multiple connections,
   // you will get a list of the order in which they are connected.
 
