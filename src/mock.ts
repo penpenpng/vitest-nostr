@@ -140,7 +140,6 @@ function relayBehavior(): MockServerBehavior &
       counts.delete(socket);
       events.delete(socket);
       sockets.delete(socket);
-      socket.close();
     },
     emit(message, socket) {
       const toBeSent =
