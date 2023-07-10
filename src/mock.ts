@@ -21,6 +21,7 @@ export interface MockServerBehavior {
 interface MockServer extends WS {
   getSockets: (count: number) => Promise<MockServerSocket[]>;
   getSocket: (index: number) => Promise<MockServerSocket>;
+  getSocketsSync: () => MockServerSocket[];
 }
 
 export function createMockServer(
@@ -67,7 +68,7 @@ export function createMockServer(
     });
   });
 
-  const getSockets = async (count: number) => {
+  const getSockets = async (count: number, timeout?: number) => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     let resolver = (_x: MockServerSocket[]) => {
       /* do nothing */
@@ -84,7 +85,8 @@ export function createMockServer(
 
     return withTimeout(
       promise,
-      `Mock relay was waiting for ${count} connections to be established, but timed out.`
+      `Mock relay was waiting for ${count} connections to be established, but timed out.`,
+      timeout
     );
   };
   const getSocket = async (index: number) => {
@@ -95,6 +97,7 @@ export function createMockServer(
   return Object.assign(server, {
     getSockets,
     getSocket,
+    getSocketsSync: () => [...sockets],
   });
 }
 
