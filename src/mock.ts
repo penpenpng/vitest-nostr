@@ -19,7 +19,10 @@ export interface MockServerBehavior {
 }
 
 interface MockServer extends WS {
-  getSockets: (count: number) => Promise<MockServerSocket[]>;
+  getSockets: (
+    count: number,
+    options?: { timeout?: number }
+  ) => Promise<MockServerSocket[]>;
   getSocket: (index: number) => Promise<MockServerSocket>;
   getSocketsSync: () => MockServerSocket[];
 }
@@ -30,6 +33,8 @@ export function createMockServer(
 ): MockServer {
   const server = new WS(url, { jsonProtocol: true });
   const sockets: MockServerSocket[] = [];
+  let resolvers: [count: number, resolve: (v: MockServerSocket[]) => void][] =
+    [];
   let nextId = 1;
 
   server.on("connection", (_socket) => {
@@ -50,6 +55,11 @@ export function createMockServer(
     };
 
     sockets.push(socket);
+    resolvers
+      .filter(([count]) => count <= sockets.length)
+      .forEach(([, resolve]) => resolve([...sockets]));
+    resolvers = resolvers.filter(([count]) => count > sockets.length);
+
     behavior.onOpen?.(socket);
 
     _socket.on("message", (message) => {
@@ -68,25 +78,19 @@ export function createMockServer(
     });
   });
 
-  const getSockets = async (count: number, timeout?: number) => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    let resolver = (_x: MockServerSocket[]) => {
-      /* do nothing */
-    };
+  const getSockets = async (count: number, options?: { timeout?: number }) => {
     const promise = new Promise<MockServerSocket[]>((resolve) => {
-      resolver = resolve;
-    });
-
-    setInterval(() => {
       if (sockets.length >= count) {
-        return resolver(sockets);
+        resolve([...sockets]);
+      } else {
+        resolvers.push([count, resolve]);
       }
-    }, 10);
+    });
 
     return withTimeout(
       promise,
       `Mock relay was waiting for ${count} connections to be established, but timed out.`,
-      timeout
+      options?.timeout
     );
   };
   const getSocket = async (index: number) => {
